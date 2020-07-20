@@ -1,0 +1,88 @@
+Sub Wallstreet()
+    Dim tickerCol As Integer
+    Dim openCol As Integer
+    Dim closeCol As Integer
+    Dim volCol As Integer
+    Dim row As Long
+    Dim column As Integer
+    Dim tickerName As String
+    Dim yearlyChangeTotal As Double
+    Dim openValue As Double
+    Dim closeValue As Double
+    Dim openIndex As Long
+    Dim totalStockVolumn As Double
+    Dim yearlyChangeTotalRow As Integer
+    Dim increaseValue As Double
+    Dim percentageChangeTotal As Double
+    Dim numberOfWorkSheets As Integer
+    Dim currentWorkSheet As Worksheet
+    Dim WorkSheetIndex As Integer
+    Dim greatestIncrease As Boolean
+    Dim greatestDecrease As String
+    Dim greatestTotalVolumn As String
+    Dim summaryColumn As Integer
+    Dim returnValue As Variant
+    
+    tickerCol = 1
+    openCol = 3
+    closeCol = 6
+    volCol = 7
+    row = 2
+    column = 1
+    yearlyChangeTotal = 0#
+    openIndex = 2
+    totalStockVolumn = 0
+    yearlyChangeTotalRow = 2
+    increaseValue = 0#
+    percentageChangeTotal = 0#
+    currentWorkSheetIndex = 0
+    numberOfWorkSheets = Application.Sheets.Count
+    high_results = 0#
+    WorkSheetIndex = 1
+                    
+    For WorkSheetIndex = 1 To numberOfWorkSheets  ' Loop Through all worksheets Starts with Worksheet 1..3
+        openValue = Sheets(WorkSheetIndex).Cells(row, openCol).Value ' Gets 1st value in Open Cell Row #1
+        Do Until IsEmpty(Sheets(WorkSheetIndex).Cells(row, column).Value) = True ' Loops through all ROW in WorkSheet
+             Worksheets(WorkSheetIndex).Select ' Selects Worksheet 1..3 one per "For" loop, The WorkSheetIndex value determines what sheet is being processed
+             If Sheets(WorkSheetIndex).Cells(row + 1, tickerCol).Value <> Sheets(WorkSheetIndex).Cells(row, tickerCol).Value Then   ' Compares Tickers Row plus Row + 1
+                StockFunctions.set_headers (WorkSheetIndex)  ' Calls a Function in StockFunction to set the Summary Header to the Right
+                tickerName = Sheets(WorkSheetIndex).Cells(row, tickerCol).Value ' Get Ticker Name Value in certain row, within the Ticker Column
+                closeValue = Sheets(WorkSheetIndex).Cells(row, closeCol).Value ' Get Close Value in certain row, within the Close Column
+                If openValue <> 0 Then ' Make sure that Open Value is not Zero, if it's not Zero, 1. Calculate % Change Total;  2. Calculate Yearly Change Total
+                    percentageChangeTotal = ((closeValue - openValue) / openValue)
+                    yearlyChangeTotal = closeValue - openValue
+                Else    ' Else if Open Value is equal to Zero
+                    percentageChangeTotal = 0  ' % change Total = 0
+                    yearlyChangeTotal = 0  ' Yearly Change Total = 0
+                End If
+                Sheets(WorkSheetIndex).Range("I" & yearlyChangeTotalRow).Value = tickerName   ' Write Ticker Name in to Col 'I' of Change Total Row (The Row Number)
+                Sheets(WorkSheetIndex).Range("J" & yearlyChangeTotalRow).Value = yearlyChangeTotal  ' Write yearly Change Total in to Col 'J' of Change Total Row (The Row Number)
+                Sheets(WorkSheetIndex).Range("K" & yearlyChangeTotalRow).Value = percentageChangeTotal ' Write % Change Total in to Col 'K' of Change Total Row (The Row Number)
+                Sheets(WorkSheetIndex).Range("K" & yearlyChangeTotalRow).NumberFormat = "0.00%"  ' Format the value above as 0.00%
+                totalStockVolumn = totalStockVolumn + Sheets(WorkSheetIndex).Cells(row, volCol).Value  ' Adding Total Stock Volumn value
+                If Sheets(WorkSheetIndex).Range("J" & yearlyChangeTotalRow).Value > 0 Then     ' If Yearly Change value is greater than zero
+                    Sheets(WorkSheetIndex).Range("J" & yearlyChangeTotalRow).Interior.ColorIndex = 4  ' Change color of cell to green
+                Else
+                    Sheets(WorkSheetIndex).Range("J" & yearlyChangeTotalRow).Interior.ColorIndex = 3  ' change color of cell to red if value is less than zero
+                End If
+                greatestIncrease = get_greatest_increase(WorkSheetIndex, 11)                          ' get the greatest increase % (by way of a function in Stock Function)
+                greatestDecrease = get_least_increase(WorkSheetIndex, 11)                             ' get the least increase % (by way of a function in Stock Function)
+                greatestTotalVolume = get_greatest_total_volume(WorkSheetIndex, 12)                   ' get the total Volume (by way of a function in Stock Function)
+                
+                Sheets(WorkSheetIndex).Range("L" & yearlyChangeTotalRow).Value = totalStockVolumn     ' Writing the Total Stock Volumn value in the summary section
+                yearlyChangeTotalRow = yearlyChangeTotalRow + 1                                       ' Adding 1 to Yearly Change Total Row to move to the next row number
+                openValue = Sheets(WorkSheetIndex).Cells(row + 1, openCol)                            ' Getting the Open Value from the Open Col Cell
+                totalStockVolumn = 0                                                                  ' Resetting Total Stock volumn variable to zero to be used again by next worksheet
+             Else
+                totalStockVolumn = totalStockVolumn + Sheets(WorkSheetIndex).Cells(row, volCol).Value   ' Accumulating the Total Stock Volumn every time Tickers are equal
+             End If
+        row = row + 1 ' Add one to row, which means move to the next row in the worksheet
+        Loop   ' Do loop, bumps to next row
+        row = 2  ' resets row index back to '2' because when we get here, an entire worksheet has been process so we must start over from the top when to move to the next worksheet
+        yearlyChangeTotalRow = 2  ' resets Yearly Change Total Row to 2 for the same reason as above
+        greatestIncrease = Empty  ' resets greatest Increase to empty for same reason as above
+        greatestDecrease = Empty  ' resets greatest descrease to empty for same reason as above
+        greatestTotalVolume = Empty ' resets greatest total volume to empty for same reason as above
+    Next WorkSheetIndex  ' moves to next work sheet
+    Worksheets(1).Select ' After everything is processed, Sheet 1..3, selects sheet #1 because that's where the process button is located
+End Sub

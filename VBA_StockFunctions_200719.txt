@@ -1,0 +1,140 @@
+Function get_num_of_sheets() As Integer
+    
+    get_num_of_sheets = Application.Sheets.Count
+    
+End Function
+' Sets the headers including Summary Headers and Greater % headers
+Sub set_headers(WorkSheetIndex As Integer)
+    
+    Dim totalHeaderColumn As Integer
+    
+    totalHeaderRow = 1
+    
+    Sheets(WorkSheetIndex).Cells(totalHeaderRow, 9).Value = "Ticker"
+    Sheets(WorkSheetIndex).Cells(totalHeaderRow, 10).Value = "Yearly Change"
+    Sheets(WorkSheetIndex).Cells(totalHeaderRow, 11).Value = "Percent Charge"
+    Sheets(WorkSheetIndex).Cells(totalHeaderRow, 12).Value = "Total Stock Volume"
+    
+    Sheets(WorkSheetIndex).Cells(totalHeaderRow + 1, 14).Value = "Greatest % Increase"
+    Sheets(WorkSheetIndex).Cells(totalHeaderRow + 2, 14).Value = "Greatest % Descrease"
+    Sheets(WorkSheetIndex).Cells(totalHeaderRow + 3, 14).Value = "Greatest Total Volume"
+    Sheets(WorkSheetIndex).Cells(totalHeaderRow, 15).Value = "Ticker"
+    Sheets(WorkSheetIndex).Cells(totalHeaderRow, 16).Value = "Value"
+    
+End Sub
+
+' loops through number associcated with Greates % Increase looking for the Largest Number (in the Summary Area)
+Function get_greatest_increase(WorkSheetIndex As Integer, column As Integer) As Variant
+    Dim row As Integer
+    Dim firstValue As Double
+    Dim secondValue As Double
+    Dim finalValue As Double
+    Dim tickerColumn As Integer
+    Dim tickerValue As String
+    Dim greatIncreaseRow As Integer
+    
+    row = 2
+    firstValue = 0#
+    secondValue = 0#
+    finalValue = 0#
+    tickerColumn = 9
+    greatIncreaseRow = 2
+    
+    finalValue = Sheets(WorkSheetIndex).Cells(row, column).Value
+    tickerValue = Sheets(WorkSheetIndex).Cells(row, tickerColumn).Value
+    Do Until Sheets(WorkSheetIndex).Cells(row, column).Value = Empty
+        Sheets(WorkSheetIndex).Activate
+        If Sheets(WorkSheetIndex).Cells(row, column).Value <> Empty Then
+            secondValue = Sheets(WorkSheetIndex).Cells(row, column).Value
+            If finalValue < secondValue And secondValue <> Empty Then
+                finalValue = secondValue
+                tickerValue = Sheets(WorkSheetIndex).Cells(row, tickerColumn).Value
+            End If
+        End If
+        row = row + 1
+    Loop
+    
+    Sheets(WorkSheetIndex).Range("O" & greatIncreaseRow).Value = tickerValue
+    Sheets(WorkSheetIndex).Cells(greatIncreaseRow, 16).Value = finalValue
+    Sheets(WorkSheetIndex).Range("P" & greatIncreaseRow).NumberFormat = "0.000%"
+    
+    get_greatest_increase = True
+End Function
+
+' loops through number associcated with Greatest % Decrease looking for the Smallest Number (in the Summary Area)
+Function get_least_increase(WorkSheetIndex As Integer, column As Integer) As Variant
+    Dim row As Integer
+    Dim firstValue As Double
+    Dim secondValue As Double
+    Dim finalValue As Double
+    Dim tickerColumn As Integer
+    Dim tickerValue As String
+    Dim greatDescreaseRow As Integer
+    
+    row = 2
+    firstValue = 0#
+    secondValue = 0#
+    finalValue = 0#
+    tickerColumn = 9
+    greatDescreaseRow = 3
+    
+    finalValue = Sheets(WorkSheetIndex).Cells(row, column).Value
+    tickerValue = Sheets(WorkSheetIndex).Cells(row, tickerColumn).Value
+    Do Until IsEmpty(Sheets(WorkSheetIndex).Cells(row, column).Value) = True
+        Sheets(WorkSheetIndex).Activate
+        If IsEmpty(Sheets(WorkSheetIndex).Cells(row, column).Value) <> True Then
+            secondValue = Sheets(WorkSheetIndex).Cells(row, column).Value
+            If finalValue > secondValue And secondValue <> Empty Then
+                finalValue = secondValue
+                tickerValue = Sheets(WorkSheetIndex).Cells(row, tickerColumn).Value
+            End If
+        End If
+        row = row + 1
+    Loop
+    
+    Sheets(WorkSheetIndex).Range("O" & greatDescreaseRow).Value = tickerValue
+    Sheets(WorkSheetIndex).Cells(greatDescreaseRow, 16).Value = finalValue
+    Sheets(WorkSheetIndex).Range("P" & greatDescreaseRow).NumberFormat = "0.000%"
+    
+    get_least_increase = True
+End Function
+
+' loops through number associcated with Total Volume for the largest value of that Set of Numbers (in the Summary Area)
+Function get_greatest_total_volume(WorkSheetIndex As Integer, column As Integer) As Variant
+    Dim row As Integer
+    Dim firstValue As Double
+    Dim secondValue As Double
+    Dim finalValue As String
+    Dim tickerColumn As Integer
+    Dim tickerValue As String
+    Dim greatTotalVolumnRow As Integer
+    
+    row = 2
+    firstValue = 0#
+    secondValue = 0#
+    finalValue = 0#
+    tickerColumn = 9
+    greatTotalVolumnRow = 4
+    
+    finalValue = Sheets(WorkSheetIndex).Cells(row, column).Value
+    tickerValue = Sheets(WorkSheetIndex).Cells(row, tickerColumn).Value
+    Do Until Sheets(WorkSheetIndex).Cells(row, column).Value = Empty
+        Sheets(WorkSheetIndex).Activate
+        If Sheets(WorkSheetIndex).Cells(row, column).Value <> Empty Then
+            secondValue = Sheets(WorkSheetIndex).Cells(row, column).Value
+            If finalValue < secondValue And secondValue <> Empty Then
+                finalValue = secondValue
+                tickerValue = Sheets(WorkSheetIndex).Cells(row, tickerColumn).Value
+            End If
+        End If
+        row = row + 1
+    Loop
+    
+    Sheets(WorkSheetIndex).Range("O" & greatTotalVolumnRow).Value = tickerValue
+    Sheets(WorkSheetIndex).Cells(greatTotalVolumnRow, 16).Value = finalValue
+    Sheets(WorkSheetIndex).Range("P" & greatTotalVolumnRow).NumberFormat = "0.000"
+    
+    get_greatest_total_volume = True
+End Function
+
+ 
